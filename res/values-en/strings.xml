@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="yes">YES</string>
+    <string name="no">NO</string>
+    <string name="info">Information</string>
+    <string name="warning">Warning</string>
+    <string name="error">Error</string>
+
+</resources>
