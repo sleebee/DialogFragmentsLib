@@ -3,6 +3,8 @@ package lib.dialogfragment.dialog.support;
 import lib.dialogfragment.R;
 import lib.dialogfragment.defs.DialogDefines;
 import lib.dialogfragment.dialog.listener.DismissListener;
+import lib.dialogfragment.dialog.listener.interfaces.OnConfirmListener;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -19,7 +21,11 @@ import android.support.v4.app.DialogFragment;
  */
 public class AlertDialogFragment extends DialogFragment {
 	private static DialogInterface.OnClickListener mListener;
+	private OnConfirmListener mCallback;
 
+	/**
+	 * Mandatory empty constructor
+	 */
 	public AlertDialogFragment() {}
 
 	/**
@@ -100,8 +106,31 @@ public class AlertDialogFragment extends DialogFragment {
 			builder.setTitle(title);
 		}
 		builder.setMessage(msg);
-		builder.setPositiveButton(yes, mListener != null ? mListener : new DismissListener());
+		DialogInterface.OnClickListener listener = null;
+		if(mCallback == null) {
+			if(mListener == null) {
+				listener = new DismissListener();
+			} else {
+				listener = mListener;
+			}
+		} else {
+			listener = new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					mCallback.onConfirm();
+				}
+			};
+		}
+		builder.setPositiveButton(yes, listener);
 
 		return builder.create();
+	}
+
+	@Override
+	public void onAttach(Activity a) {
+		super.onAttach(a);
+		if(a instanceof OnConfirmListener){
+			mCallback = (OnConfirmListener) a;
+		}
 	}
 }

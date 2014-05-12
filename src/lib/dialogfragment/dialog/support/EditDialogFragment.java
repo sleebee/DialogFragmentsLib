@@ -3,6 +3,8 @@ package lib.dialogfragment.dialog.support;
 import lib.dialogfragment.R;
 import lib.dialogfragment.defs.DialogDefines;
 import lib.dialogfragment.dialog.listener.DismissListener;
+import lib.dialogfragment.dialog.listener.interfaces.OnEditConfirmListener;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -26,6 +28,7 @@ import android.widget.EditText;
 public class EditDialogFragment extends DialogFragment {
 	private static EditText mEditText;
 	private DialogInterface.OnClickListener mListener = null;
+	private OnEditConfirmListener mCallback;
 
 	/**
 	 * Mandatory empty constructor
@@ -126,7 +129,22 @@ public class EditDialogFragment extends DialogFragment {
 		if(title != null) {
 			builder.setTitle(title);
 		}
-		builder.setPositiveButton(yes, mListener != null ? mListener : new DismissListener());
+		DialogInterface.OnClickListener listener = null;
+		if(mCallback == null) {
+			if(mListener == null) {
+				listener = new DismissListener();
+			} else {
+				listener = mListener;
+			}
+		} else {
+			listener = new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					mCallback.onConfirm(mEditText.getText().toString());
+				}
+			};
+		}
+		builder.setPositiveButton(yes, listener);
 		builder.setNegativeButton(no, new DismissListener());
 
 		return builder.create();
@@ -143,5 +161,13 @@ public class EditDialogFragment extends DialogFragment {
 			ret = mEditText.getText().toString();
 		}
 		return ret;
+	}
+
+	@Override
+	public void onAttach(Activity a) {
+		super.onAttach(a);
+		if(a instanceof OnEditConfirmListener) {
+			mCallback = (OnEditConfirmListener) a;
+		}
 	}
 }

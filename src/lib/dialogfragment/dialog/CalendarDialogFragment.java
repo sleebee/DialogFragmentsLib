@@ -6,6 +6,8 @@ import java.util.Date;
 import lib.dialogfragment.R;
 import lib.dialogfragment.defs.DialogDefines;
 import lib.dialogfragment.dialog.listener.DismissListener;
+import lib.dialogfragment.dialog.listener.interfaces.OnDateConfirmListener;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -29,6 +31,7 @@ import android.widget.CalendarView;
 public class CalendarDialogFragment extends DialogFragment {
 	private static Calendar mCal;
 	private DialogInterface.OnClickListener mListener;
+	private OnDateConfirmListener mCallback;
 
 	/**
 	 * Mandatory empty constructor
@@ -190,7 +193,23 @@ public class CalendarDialogFragment extends DialogFragment {
 		}
 		builder.setView(view);
 		builder.setNegativeButton(no, new DismissListener());
-		builder.setPositiveButton(yes, mListener);
+
+		DialogInterface.OnClickListener listener = null;
+		if(mCallback == null) {
+			if(mListener == null) {
+				listener = new DismissListener();
+			} else {
+				listener = mListener;
+			}
+		} else {
+			listener = new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					mCallback.onConfirm(mCal);
+				}
+			};
+		}
+		builder.setPositiveButton(yes, listener);
 
 		return builder.create();
 	}
@@ -217,5 +236,13 @@ public class CalendarDialogFragment extends DialogFragment {
 	 */
 	public static long getDateMilis() {
 		return mCal.getTimeInMillis();
+	}
+
+	@Override
+	public void onAttach(Activity a) {
+		super.onAttach(a);
+		if(a instanceof OnDateConfirmListener) {
+			mCallback = (OnDateConfirmListener) a;
+		}
 	}
 }
